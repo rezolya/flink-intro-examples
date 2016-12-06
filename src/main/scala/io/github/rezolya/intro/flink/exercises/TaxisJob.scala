@@ -17,7 +17,7 @@ object TaxisJob {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     // configure event-time processing
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
-    env.setParallelism(1)
+    //env.setParallelism(1)
 
     val maxDelay = 1
     val servingSpeed = 60
