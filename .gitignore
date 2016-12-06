@@ -1,0 +1,16 @@
+target
+.idea/
+.idea_modules
+.classpath
+.project
+.settings
+build.properties
+*.iml
+*.sc
+target/
+logs/
+.history
+*/.toDelete
+.toDelete
+
+dependency-reduced-pom.xml
