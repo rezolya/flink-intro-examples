@@ -19,6 +19,9 @@ package io.github.rezolya.intro.flink.examples
  */
 
 import org.apache.flink.streaming.api.scala._
+import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows
+import org.apache.flink.streaming.api.windowing.time.Time
+import org.apache.flink.util.Collector
 
 /**
  * This example shows an implementation of WordCount with data from a text socket. 
@@ -56,11 +59,12 @@ object SocketTextStreamWordCount {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
 
     // create streams for names and ages by mapping the inputs to the corresponding objects
-    val text = env.socketTextStream(hostName, port)
-    val counts = text.flatMap { _.toLowerCase.split("\\W+") filter { _.nonEmpty } }
+    val text: DataStream[String] = env.socketTextStream(hostName, port)
+    val counts = text.flatMap { _.toLowerCase.split("\\W+").filter{_.nonEmpty} }
       .map { (_, 1) }
-      .keyBy(0)
-      .sum(1)
+      .keyBy(_._1)
+      .window(TumblingProcessingTimeWindows.of(Time.seconds(10)))
+      .apply((word, timeWindow, windowData, collector: Collector[(String, Int)]) => collector.collect(word, windowData.size))
 
     counts print
 
