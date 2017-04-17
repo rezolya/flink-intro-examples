@@ -33,14 +33,16 @@ object FizzBuzzJob {
   def main(args: Array[String]) {
     // set up the streaming execution environment
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.setParallelism(1)
+//    env.setParallelism(1)
 
-    val text = env.socketTextStream("localhost", 9998)
+    val text = env.socketTextStream("localhost", 9998).setParallelism(1).name("Text input")
+//    val text = env.fromElements("1", "2", "3").name("Text input")
 
-    val numbers: DataStream[Int] = env.fromElements(1, 2, 3)
-    val times3: DataStream[Int] = numbers.map(n => n*3)               //3, 6, 9
-    val repeated: DataStream[Int] = times3.flatMap(n => Seq(n, n))    //3, 3, 6, 6, 9, 9
-    val even: DataStream[Int] = repeated.filter(n => n%2==0)          //6, 6
+    val numbers: DataStream[Int] = text.map(s => s.toInt).name("Convert to Int")
+//    val numbers: DataStream[Int] = env.fromElements(1, 2, 3)
+//    val times3: DataStream[Int] = numbers.map(n => n*3)               //3, 6, 9
+//    val repeated: DataStream[Int] = times3.flatMap(n => Seq(n, n))    //3, 3, 6, 6, 9, 9
+//    val even: DataStream[Int] = repeated.filter(n => n%2==0)          //6, 6
     //val numbers = text.map(t => t.toInt)
 
     val fizzbuzz = numbers.map{ n =>
@@ -50,15 +52,19 @@ object FizzBuzzJob {
         case (_, 0) => "Buzz"
         case _ => n.toString
       }
-    }
+    }.name("Fizzbuzz")
 
     val serialisationSchema = new SerializationSchema[String]() {
       override def serialize(t: String): Array[Byte] = s"$t\n".getBytes
     }
 
-    fizzbuzz.addSink(new SocketClientSink("localhost", 9999, serialisationSchema, 0, true))
+//    fizzbuzz.addSink(new SocketClientSink("localhost", 9999, serialisationSchema, 0, true))
+    fizzbuzz.writeAsText("/tmp/numbers.txt", WriteMode.OVERWRITE).name("Output")
 
-    even.writeAsText("/tmp/numbers.txt", WriteMode.OVERWRITE)
+//    even.writeAsText("/tmp/numbers.txt", WriteMode.OVERWRITE)
+
+    println(env.getExecutionPlan)
+
     // execute program
     env.execute("Flink Streaming Scala API Skeleton")
   }
