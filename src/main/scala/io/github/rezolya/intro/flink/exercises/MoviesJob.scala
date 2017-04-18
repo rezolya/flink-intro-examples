@@ -16,42 +16,27 @@ object MoviesJob {
     val env = ExecutionEnvironment.getExecutionEnvironment
 
     // get input data
-    val text = env.readTextFile("/tmp/ratings.list")
+    val text = env.readTextFile("/tmp/movies/ratings.list")
 
     //TODO: Exercise 1.1. Convert the text to objects of class Rating
-    val validRatings: DataSet[Rating] = ???
+    val validRatings: DataSet[Rating] = text.flatMap(str => Rating.parse(str))
     validRatings.writeAsText("/tmp/movies/validRatings.txt", WriteMode.OVERWRITE)
 
     //TODO: Exercise 1.2. Find your favourite movie
-    val favouriteMovie: DataSet[Rating] = ???
-    favouriteMovie.writeAsText("/tmp/favouriteMovieRating.txt", WriteMode.OVERWRITE)
+    val favouriteMovie: DataSet[Rating] = validRatings.filter(rating => rating.title.startsWith("Bridget"))
+    favouriteMovie.writeAsText("/tmp/movies/favouriteMovieRating.txt", WriteMode.OVERWRITE)
+
+    val words: DataSet[String] = validRatings.flatMap(rating => rating.title.split("\\W+"))
 
     //TODO: Exercise 1.3. Count words in the titles
-    val wordCount: DataSet[(String, Int)] = ???
+    val wordCount: DataSet[(String, Int)] = words.map(word => (word, 1)).groupBy(0).sum(1)
     wordCount.writeAsText("/tmp/movies/wordCount.txt", WriteMode.OVERWRITE)
-
-    //TODO: Exercise 1.4. Split all ratings in 10 buckets by rank and count how many movies are in each one
-    val buckets = (0 to 9).map(n => Bucket(n, n+1))
-    //1. Add a bucket to the rating
-    val withBuckets: DataSet[(Bucket, Rating)] = ???
-    //2. Calculate how many ratings are in each bucket
-    val bucketCount: DataSet[(Bucket, Int)] = ???
-
-    bucketCount.print()
-
-    //TODO: Exercise 1.5: Output the ranks that are not in defined buckets to a file
-    val weirdRank: DataSet[Rating] = ???
-    weirdRank.writeAsText("/tmp/movies/weirdRank.txt", WriteMode.OVERWRITE)
 
     env.execute()
   }
 }
 
 case class Rating(distribution: String, votes: Long, rank: Double, title: String, year: Long, episodeDesc: String)
-
-case class Bucket(min: Double, max: Double){
-  def isIn(n: Double) = n >= min && n<max
-}
 
 object Rating {
   def parse(input: String): Option[Rating] = {
