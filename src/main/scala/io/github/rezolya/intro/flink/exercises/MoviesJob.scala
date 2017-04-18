@@ -19,18 +19,18 @@ object MoviesJob {
     val text = env.readTextFile("/tmp/movies/ratings.list")
 
     //TODO: Exercise 1.1. Convert the text to objects of class Rating
-    val validRatings: DataSet[Rating] = text.flatMap(str => Rating.parse(str))
+    val validRatings: DataSet[Rating] = ???
     validRatings.writeAsText("/tmp/movies/validRatings.txt", WriteMode.OVERWRITE)
 
+/*
     //TODO: Exercise 1.2. Find your favourite movie
-    val favouriteMovie: DataSet[Rating] = validRatings.filter(rating => rating.title.startsWith("Bridget"))
+    val favouriteMovie: DataSet[Rating] = ???
     favouriteMovie.writeAsText("/tmp/movies/favouriteMovieRating.txt", WriteMode.OVERWRITE)
 
-    val words: DataSet[String] = validRatings.flatMap(rating => rating.title.split("\\W+"))
-
     //TODO: Exercise 1.3. Count words in the titles
-    val wordCount: DataSet[(String, Int)] = words.map(word => (word, 1)).groupBy(0).sum(1)
+    val wordCount: DataSet[(String, Int)] = ???
     wordCount.writeAsText("/tmp/movies/wordCount.txt", WriteMode.OVERWRITE)
+*/
 
     env.execute()
   }

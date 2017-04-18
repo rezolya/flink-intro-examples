@@ -30,10 +30,10 @@ object TaxisJob {
     val rides: DataStream[TaxiRide] = env.addSource(
       new TaxiRideSource("/tmp/nycTaxiRides.gz", maxDelay, servingSpeed))
 
+/*
     //TODO: Exercise 2.2. Taxi Ride Cleansing. Filter out only taxi rides which start and end in the New York City
     //GeoUtils.isInNYC() can tell you whether a location is in NYC.
-    val nyRides: DataStream[TaxiRide] = rides.filter(ride =>
-      rideInNY(ride))
+    val nyRides: DataStream[TaxiRide] = ???
 
     //TODO: Exercise 3. Popular places. Find popular places by counting places where the taxi rides stop or start
     //use GeoUtils.mapToGridCell(float lon, float lat) to group locations
@@ -41,38 +41,23 @@ object TaxisJob {
 
     //1. determine the sells of start and end of the taxi rides
     // result type: (Int - cell id, TaxiRide)
-    val withCell: DataStream[(Int, TaxiRide)] = nyRides.map(ride =>
-      (GeoUtils.mapToGridCell(ride.startLon, ride.startLat), ride)
-    )
+    val withCell: DataStream[(Int, TaxiRide)] = ???
 
-    val keyedStream: KeyedStream[(Int, TaxiRide), Int] = withCell.keyBy(tuple => tuple._1)
     //2. find out how many times each cell is visited
     // result type: (Int - cell id, Long - timestamp of the count, Boolean - arrival or departure, Int - count)
-    val cellVisits: DataStream[(Int, Long, Int)] = keyedStream
-      .window(SlidingEventTimeWindows.of(Time.minutes(15), Time.minutes(5)))
-      .apply { (key, timeWindow, collectedTuples, collector) =>
-        val result: (Int, Long, Int) = (key, timeWindow.getEnd, collectedTuples.size)
-        collector.collect(result)
-      }
+    val cellVisits: DataStream[(Int, Long, Int)] = ???
 
     //3. filter the popular cells only - the ones that have more visits that popularityThreshold
     val popularityThreshold = 10
-    val popularCells: DataStream[(Int, Long, Int)] = cellVisits.filter(tuple => tuple._3 > popularityThreshold)
+    val popularCells: DataStream[(Int, Long, Int)] = ???
 
     //4. convert the cell id to coordinates of the cell (use GeoUtils.getGridCellCenterLat(cellId))
     // result type: (Float - cell longitude, Float - cell latitude, Long - timestamp of the count, Boolean - arrival or departure, Int - count)
-    val popularPlaces: DataStream[(Float, Float, Long, Integer)] = popularCells.map(tuple =>
-      (GeoUtils.getGridCellCenterLon(tuple._1), GeoUtils.getGridCellCenterLat(tuple._1), tuple._2, tuple._3)
-    )
+    val popularPlaces: DataStream[(Float, Float, Long, Integer)] = ???
+*/
 
     //TODO: Exercise 2.1. Write the taxi rides to a socket stream, and see how this works
-    val stringRides: DataStream[String] = popularCells.map(_.toString)
-
-    val serializationSchema = new SerializationSchema[String] {
-      override def serialize(t: String): Array[Byte] = s"$t\n".getBytes()
-    }
-    val socketSinkFunction = new SocketClientSink[String]("localhost", 9998, serializationSchema)
-    stringRides.addSink(socketSinkFunction).setParallelism(1)
+    val stringRides: DataStream[String] = ???
 
     env.execute()
   }
