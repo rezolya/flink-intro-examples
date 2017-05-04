@@ -32,7 +32,7 @@ object TaxisJob {
 
 /*
     //TODO: Exercise 2.2. Taxi Ride Cleansing. Filter out only taxi rides which start and end in the New York City
-    //GeoUtils.isInNYC() can tell you whether a location is in NYC.
+    //rideInNY() can tell you whether a location is in NYC.
     val nyRides: DataStream[TaxiRide] = ???
 
     //TODO: Exercise 3. Popular places. Find popular places by counting places where the taxi rides stop or start
@@ -44,7 +44,7 @@ object TaxisJob {
     val withCell: DataStream[(Int, TaxiRide)] = ???
 
     //2. find out how many times each cell is visited
-    // result type: (Int - cell id, Long - timestamp of the count, Boolean - arrival or departure, Int - count)
+    // result type: (Int - cell id, Long - timestamp of the count, Int - count)
     val cellVisits: DataStream[(Int, Long, Int)] = ???
 
     //3. filter the popular cells only - the ones that have more visits that popularityThreshold
@@ -52,7 +52,7 @@ object TaxisJob {
     val popularCells: DataStream[(Int, Long, Int)] = ???
 
     //4. convert the cell id to coordinates of the cell (use GeoUtils.getGridCellCenterLat(cellId))
-    // result type: (Float - cell longitude, Float - cell latitude, Long - timestamp of the count, Boolean - arrival or departure, Int - count)
+    // result type: (Float - cell longitude, Float - cell latitude, Long - timestamp of the count, Int - count)
     val popularPlaces: DataStream[(Float, Float, Long, Integer)] = ???
 */
 
