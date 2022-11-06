@@ -18,10 +18,9 @@ package io.github.rezolya.intro.flink.examples
  * limitations under the License.
  */
 
-import org.apache.flink.core.fs.FileSystem.WriteMode
+import org.apache.flink.api.common.serialization.SerializationSchema
 import org.apache.flink.streaming.api.functions.sink.SocketClientSink
 import org.apache.flink.streaming.api.scala._
-import org.apache.flink.streaming.util.serialization.SerializationSchema
 
 /**
  * FizzBuzz streaming example.
@@ -30,21 +29,12 @@ import org.apache.flink.streaming.util.serialization.SerializationSchema
   *  nc -l 127.0.0.1 9999   - here the output will show
  */
 object FizzBuzzJob {
-  def main(args: Array[String]) {
-    // set up the streaming execution environment
+  def main(args: Array[String]): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-//    env.setParallelism(1)
 
     val text = env.socketTextStream("localhost", 9998).setParallelism(1).name("Text input")
-//    val text = env.fromElements("1", "2", "3").name("Text input")
 
     val numbers: DataStream[Int] = text.map(s => s.toInt).name("Convert to Int")
-//    val numbers: DataStream[Int] = env.fromElements(1, 2, 3)
-//    val times3: DataStream[Int] = numbers.map(n => n*3)               //3, 6, 9
-//    val repeated: DataStream[Int] = times3.flatMap(n => Seq(n, n))    //3, 3, 6, 6, 9, 9
-//    val even: DataStream[Int] = repeated.filter(n => n%2==0)          //6, 6
-    //val numbers = text.map(t => t.toInt)
-
     val fizzbuzz = numbers.map{ n =>
       (n % 3, n % 5) match {
         case (0, 0) => "FizzBuzz"
@@ -58,14 +48,11 @@ object FizzBuzzJob {
       override def serialize(t: String): Array[Byte] = s"$t\n".getBytes
     }
 
-//    fizzbuzz.addSink(new SocketClientSink("localhost", 9999, serialisationSchema, 0, true))
-    fizzbuzz.writeAsText("/tmp/numbers.txt", WriteMode.OVERWRITE).name("Output")
-
-//    even.writeAsText("/tmp/numbers.txt", WriteMode.OVERWRITE)
+    fizzbuzz.addSink(new SocketClientSink("localhost", 9999, serialisationSchema, 0, true)).setParallelism(1).name("Output")
 
     println(env.getExecutionPlan)
 
     // execute program
-    env.execute("Flink Streaming Scala API Skeleton")
+    env.execute("Flink Streaming Scala FizzBuzz")
   }
 }

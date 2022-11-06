@@ -47,26 +47,20 @@ import org.apache.flink.util.Collector
  */
 object SocketTextStreamWordCount {
 
-  def main(args: Array[String]) {
-    if (args.length != 2) {
-      System.err.println("USAGE:\nSocketTextStreamWordCount <hostname> <port>")
-      return
-    }
-    
-    val hostName = args(0)
-    val port = args(1).toInt
-
+  def main(args: Array[String]): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
 
     // create streams for names and ages by mapping the inputs to the corresponding objects
-    val text: DataStream[String] = env.socketTextStream(hostName, port)
-    val counts = text.flatMap { _.toLowerCase.split("\\W+").filter{_.nonEmpty} }
+    val text: DataStream[String] = env.socketTextStream("localhost", 9998)
+
+    val words = text.flatMap(_.toLowerCase.split("\\W+").filter(_.nonEmpty))
+    val counts = words
       .map { (_, 1) }
       .keyBy(_._1)
-      .window(TumblingProcessingTimeWindows.of(Time.seconds(10)))
+      .window(TumblingProcessingTimeWindows.of(Time.seconds(20)))
       .apply((word, timeWindow, windowData, collector: Collector[(String, Int)]) => collector.collect(word, windowData.size))
 
-    counts print
+    counts.print()
 
     env.execute("Scala WordCount from SocketTextStream Example")
   }
